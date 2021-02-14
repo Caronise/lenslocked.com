@@ -1,0 +1,40 @@
+package main
+
+import (
+    "fmt"
+    "net/http"
+    "log"
+
+    "github.com/julienschmidt/httprouter"
+)
+
+func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+    fmt.Fprint(w, "Welcome to my alternative site!")
+}
+
+func Contact(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+    fmt.Fprint(w, "To get in touch, please send an email " +
+        "to <a href=\"mailto:support@lenslocked.com\">" +
+        "support@lenslocked.com</a>.")
+}
+
+func Faq(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+    fmt.Fprint(w, "This is the FAQ page. Unfortunately, " +
+        "we don't care enough to answer any questions since " +
+        "we're not really getting paid to do any of this.")
+}
+
+func PageNotFound(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "Woah man, you shouldn't be here... " +
+        "Turn back while you still can.")
+}
+
+func main() {
+    router := httprouter.New()
+    router.NotFound = http.HandlerFunc(PageNotFound)
+    router.GET("/", Index)
+    router.GET("/contact", Contact)
+    router.GET("/faq", Faq)
+
+    log.Fatal(http.ListenAndServe(":3000", router))
+}
