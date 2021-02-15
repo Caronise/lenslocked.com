@@ -1,43 +1,43 @@
 package main
 
 import (
-    "fmt"
+    "html/template"
     "net/http"
 
     "github.com/gorilla/mux"
 )
 
-func pageNotFound(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "text/html")
-    fmt.Fprint(w, "Woah man, you shouldn't be here... " +
-        "Turn back while you still can.")
-}
+var homeTemplate *template.Template
+var contactTemplate *template.Template
 
 func home(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "text/html")
-    fmt.Fprint(w, "<h1>Welcome to my awesome site!</h1>")
+    if err := homeTemplate.Execute(w, nil); err != nil {
+        panic(err)
+    }
 }
 
 func contact (w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "text/html")
-    fmt.Fprint(w, "To get in touch, please send an email " +
-        "to <a href=\"mailto:support@lenslocked.com\">" +
-        "support@lenslocked.com</a>.")
+    if err := contactTemplate.Execute(w, nil); err != nil {
+        panic(err)
+    }
 }
 
-func faq (w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "text/html")
-    fmt.Fprint(w, "This is the FAQ page. Unfortunately, " +
-        "we don't care enough to answer any questions since " +
-        "we're not really getting paid to do any of this.")
-}
 
 func main() {
-    var h http.Handler = http.HandlerFunc(pageNotFound)
+    var err error
+    homeTemplate, err = template.ParseFiles("views/home.gohtml")
+    if err != nil {
+        panic(err)
+    }
+    contactTemplate, err = template.ParseFiles("views/contact.gohtml")
+    if err != nil {
+        panic(err)
+    }
+
     r := mux.NewRouter()
-    r.NotFoundHandler = h
     r.HandleFunc("/", home)
     r.HandleFunc("/contact", contact)
-    r.HandleFunc("/faq", faq)
     http.ListenAndServe(":3000", r)
 }
